@@ -9,6 +9,9 @@ RUN apt-get update && \
     chown -R bind:bind /var/lib/bind && \
     chown -R bind:bind /etc/bind
 
+COPY init-bind.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init-bind.sh
+
 EXPOSE 53/udp 53/tcp
 
-CMD ["/usr/sbin/named", "-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
+CMD ["/usr/local/bin/init-bind.sh"]
