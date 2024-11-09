@@ -40,7 +40,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Ensure this port mapping exists
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dnsadmin -d dns_manager"]
       interval: 5s
