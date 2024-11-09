@@ -10,6 +10,9 @@ services:
       - ./bind/config:/etc/bind:rw
       - ./bind/zones:/var/lib/bind:rw
       - bind9-cache:/var/cache/bind:rw
+      - bind9-run:/var/run/named:rw
+    cap_add:
+      - NET_ADMIN
     user: bind
     restart: always
   nginx-proxy-manager:
@@ -62,3 +65,4 @@ services:
 volumes:
   postgres_data:
   bind9-cache:
+  bind9-run:

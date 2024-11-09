@@ -1,0 +1,15 @@
+options {
+    directory "/var/cache/bind";
+    pid-file "/var/run/named/named.pid";
+    session-keyfile "/var/run/named/session.key";
+    
+    allow-recursion {
+        127.0.0.1/32;
+        172.0.0.0/8;
+    };
+    
+    allow-transfer { none; };
+    version none;
+    hostname none;
+    server-id none;
+};

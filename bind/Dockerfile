@@ -1,17 +1,26 @@
-FROM ubuntu:20.04
+FROM ubuntu/bind9:latest
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y bind9 bind9utils && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /var/cache/bind && \
-    mkdir -p /var/lib/bind && \
-    chown -R bind:bind /var/cache/bind && \
-    chown -R bind:bind /var/lib/bind && \
-    chown -R bind:bind /etc/bind
+# Create necessary directories with correct permissions
+RUN mkdir -p /var/run/named \
+    && chown -R bind:bind /var/run/named \
+    && chmod 775 /var/run/named \
+    && mkdir -p /var/cache/bind \
+    && chown -R bind:bind /var/cache/bind \
+    && chmod 775 /var/cache/bind \
+    && mkdir -p /var/lib/bind \
+    && chown -R bind:bind /var/lib/bind \
+    && chmod 775 /var/lib/bind \
+    && mkdir -p /etc/bind \
+    && chown -R bind:bind /etc/bind \
+    && chmod 775 /etc/bind
 
-COPY init-bind.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init-bind.sh
+COPY named.conf /etc/bind/
+COPY named.conf.options /etc/bind/
+COPY zones.conf /etc/bind/
 
-EXPOSE 53/udp 53/tcp
+RUN chown -R bind:bind /etc/bind && chmod 644 /etc/bind/*
 
-CMD ["/usr/local/bin/init-bind.sh"]
+EXPOSE 53/tcp
+EXPOSE 53/udp
+
+CMD ["/usr/sbin/named", "-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
