@@ -6,6 +6,7 @@ services:
     ports:
       - "1053:53/tcp"
       - "1053:53/udp"
+      - "953:953/tcp"  # Expose rndc port
     volumes:
       - ./bind/config:/etc/bind:rw
       - ./bind/zones:/var/lib/bind:rw
@@ -15,9 +16,9 @@ services:
       - NET_ADMIN
     user: bind
     restart: always
-    # Removed entrypoint to use Dockerfile's ENTRYPOINT
-    # entrypoint: ["/bind/init-bind.sh"]
-  
+    environment:
+      - BIND9_RANDOMIZE_PORT=yes  # Optional: Randomize DNS port for security
+      
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
     ports:

@@ -22,6 +22,9 @@ COPY named.conf /etc/bind/
 COPY named.conf.options /etc/bind/
 COPY zones.conf /etc/bind/
 
+# Generate rndc key
+RUN rndc-confgen -a -r /dev/urandom
+
 # Copy initialization script
 COPY init-bind.sh /bind/init-bind.sh
 
@@ -30,8 +33,10 @@ RUN chown -R bind:bind /etc/bind && chmod 644 /etc/bind/*.conf \
     && chown bind:bind /bind/init-bind.sh \
     && chmod +x /bind/init-bind.sh
 
+# Expose ports for DNS and rndc
 EXPOSE 53/tcp
 EXPOSE 53/udp
+EXPOSE 953/tcp
 
 USER bind
 
