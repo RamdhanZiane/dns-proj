@@ -140,7 +140,6 @@ def main():
     schedule.every(1).minutes.do(dns_manager.check_new_domains)
     
     while True:
-        logger.log('yo')
         schedule.run_pending()
         time.sleep(1)
 
