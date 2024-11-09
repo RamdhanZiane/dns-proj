@@ -4,20 +4,14 @@ services:
       context: ./bind
       dockerfile: Dockerfile
     ports:
-      - "1053:53/tcp"
-      - "1053:53/udp"
-      - "953:953/tcp"  # Expose rndc port
+      - "10.142.0.2:53:53/tcp"
+      - "10.142.0.2:53:53/udp"
     volumes:
-      - ./bind/config:/etc/bind:rw
-      - ./bind/zones:/var/lib/bind:rw
-      - bind9-cache:/var/cache/bind:rw
-      - bind9-run:/var/run/named:rw
-    cap_add:
-      - NET_ADMIN
+      - ./bind/config:/etc/bind
+      - ./cache:/var/cache/bind
+      - /records:/var/lib/bind
     user: bind
     restart: always
-    environment:
-      - BIND9_RANDOMIZE_PORT=no  # Disable port randomization
       
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
