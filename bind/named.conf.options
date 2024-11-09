@@ -3,11 +3,16 @@ options {
     pid-file "/var/run/named/named.pid";
     session-keyfile "/var/run/named/session.key";
     
+    listen-on { any; };        // Add this line
+    listen-on-v6 { any; };     // Add this line
+    
     allow-recursion {
         127.0.0.1/32;
         172.0.0.0/8;
+        10.142.0.0/24;         // Add your docker network
     };
     
+    allow-query { any; };      // Add this line
     allow-transfer { none; };
     version none;
     hostname none;
