@@ -14,8 +14,8 @@ class TestEnvironment:
         os.makedirs(self.config_dir, exist_ok=True)
         
         self.mock_db_data = [
-            ("example.com", "192.168.1.100"),
-            ("test.com", "192.168.1.101")
+            ("example.com", "10.142.0.2"),  # Updated IP address
+            ("test.com", "10.142.0.3")      # Ensure IPs are correct
         ]
 
     def setup_mocks(self):
@@ -76,6 +76,20 @@ class TestEnvironment:
                 print(f"Content preview:\n{content[:200]}...")
             else:
                 print(f"✗ Zone file missing for {domain}")
+
+    def verify_dns_records(self, domain):
+        print(f"\n🔍 Verifying DNS records for: {domain}")
+        resolver = dns.resolver.Resolver()
+        resolver.nameservers = ['10.142.0.2']  # Ensure internal DNS server IP
+        resolver.port = 53                     # Correct DNS port
+
+        try:
+            answers = resolver.resolve(domain, 'A')
+            print(f"✅ DNS A record found: {[str(rdata) for rdata in answers]}")
+            return True
+        except Exception as e:
+            print(f"❌ DNS lookup failed: {str(e)}")
+            return False
 
 if __name__ == "__main__":
     test_env = TestEnvironment()

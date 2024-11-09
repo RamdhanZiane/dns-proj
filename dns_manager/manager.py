@@ -20,7 +20,13 @@ class DNSManager:
             user=os.environ['DB_USER'],
             password=os.environ['DB_PASSWORD']
         )
-        self.npm_url = os.environ['NPM_API_URL']
+        self.npm_url = os.environ['NPM_API_URL']  # Ensure this points to internal service
+        # For example, if using Docker service name:
+        # self.npm_url = 'http://nginx-proxy-manager:81'
+        
+        # If accessing via internal IP, set accordingly:
+        # self.npm_url = 'http://10.142.0.2:81'
+        
         self.npm_email = os.environ['NPM_EMAIL']
         self.npm_password = os.environ['NPM_PASSWORD']
         self.npm_token = None
@@ -134,6 +140,10 @@ zone "{domain}" {{
         finally:
             if 'cur' in locals():
                 cur.close()
+
+    def verify_dns_records(self, domain):
+        resolver.nameservers = ['10.142.0.2']  # Ensure internal DNS server IP
+        resolver.port = 53                     # Correct DNS port
 
 def main():
     dns_manager = DNSManager()

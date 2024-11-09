@@ -103,8 +103,8 @@ class DNSSystemTester:
     def verify_dns_records(self, domain):
         print(f"\n🔍 Verifying DNS records for: {domain}")
         resolver = dns.resolver.Resolver()
-        resolver.nameservers = ['127.0.0.1']
-        resolver.port = 1053
+        resolver.nameservers = ['10.142.0.2']
+        resolver.port = 53
 
         try:
             answers = resolver.resolve(domain, 'A')
