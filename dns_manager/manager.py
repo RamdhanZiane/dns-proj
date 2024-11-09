@@ -137,11 +137,11 @@ zone "{domain}" {{
 
 def main():
     dns_manager = DNSManager()
-    schedule.every(10).seconds.do(dns_manager.check_new_domains)
+    schedule.every(1).minutes.do(dns_manager.check_new_domains)
     
     while True:
         schedule.run_pending()
-        time.sleep(5)
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
