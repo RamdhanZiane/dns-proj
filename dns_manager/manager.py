@@ -38,7 +38,7 @@ class DNSManager:
         os.makedirs(os.path.dirname(self.bind_config_path), exist_ok=True)
         os.makedirs(self.zones_path, exist_ok=True)
         
-        logger.info(f"DNS Manager initialized in {'production' if self.is_production else 'development'} mode")
+        logger.info(f"DNS Manager initialized in dev mode")
 
     def login_to_npm(self):
         response = requests.post(f"{self.npm_url}/api/tokens", json={
