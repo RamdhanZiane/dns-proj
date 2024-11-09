@@ -26,11 +26,11 @@ class TestEnvironment:
         db_mock.cursor.return_value = cursor_mock
 
         # Mock environment variables
-        os.environ['DB_HOST'] = 'localhost'
-        os.environ['DB_NAME'] = 'test_db'
-        os.environ['DB_USER'] = 'test_user'
+        os.environ['DB_HOST'] = 'postgres'
+        os.environ['DB_NAME'] = 'dns_manager'
+        os.environ['DB_USER'] = 'dnsadmin'
         os.environ['DB_PASSWORD'] = 'test_pass'
-        os.environ['NPM_API_URL'] = 'http://localhost:81'
+        os.environ['NPM_API_URL'] = 'http://10.142.0.3:81'
         os.environ['NPM_EMAIL'] = 'test@example.com'
         os.environ['NPM_PASSWORD'] = 'test_password'
 
@@ -76,20 +76,6 @@ class TestEnvironment:
                 print(f"Content preview:\n{content[:200]}...")
             else:
                 print(f"✗ Zone file missing for {domain}")
-
-    def verify_dns_records(self, domain):
-        print(f"\n🔍 Verifying DNS records for: {domain}")
-        resolver = dns.resolver.Resolver()
-        resolver.nameservers = ['10.142.0.2']  # Ensure internal DNS server IP
-        resolver.port = 53                     # Correct DNS port
-
-        try:
-            answers = resolver.resolve(domain, 'A')
-            print(f"✅ DNS A record found: {[str(rdata) for rdata in answers]}")
-            return True
-        except Exception as e:
-            print(f"❌ DNS lookup failed: {str(e)}")
-            return False
 
 if __name__ == "__main__":
     test_env = TestEnvironment()

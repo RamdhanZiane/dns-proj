@@ -8,6 +8,15 @@ mkdir -p /var/run/named
 chown bind:bind /var/run/named
 chmod 755 /var/run/named
 
+# Set ownership and permissions for Bind directories
+chown -R bind:bind /etc/bind
+chown -R bind:bind /var/cache/bind
+chown -R bind:bind /var/lib/bind
+
+chmod -R 755 /etc/bind
+chmod -R 755 /var/cache/bind
+chmod -R 755 /var/lib/bind
+
 # Bind9 listens on internal IP only
 cat <<EOF > /etc/bind/named.conf.options
 options {

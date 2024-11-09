@@ -25,7 +25,7 @@ class DNSManager:
         # self.npm_url = 'http://nginx-proxy-manager:81'
         
         # If accessing via internal IP, set accordingly:
-        # self.npm_url = 'http://10.142.0.2:81'
+        # self.npm_url = 'http://10.142.0.3:81'
         
         self.npm_email = os.environ['NPM_EMAIL']
         self.npm_password = os.environ['NPM_PASSWORD']
@@ -44,15 +44,18 @@ class DNSManager:
         os.makedirs(os.path.dirname(self.bind_config_path), exist_ok=True)
         os.makedirs(self.zones_path, exist_ok=True)
         
-        logger.info(f"DNS Manager initialized in dev mode")
+        logger.info(f"DNS Manager initialized in {'production' if self.is_production else 'development'} mode")
 
     def login_to_npm(self):
         response = requests.post(f"{self.npm_url}/api/tokens", json={
             "identity": self.npm_email,
             "secret": self.npm_password
         })
-        if (response.status_code == 200):
+        if response.status_code == 200:
             self.npm_token = response.json()['token']
+            logger.info("Successfully logged into NPM")
+        else:
+            logger.error(f"Failed to log into NPM: {response.status_code} - {response.text}")
 
     def create_zone_file(self, domain, records):
         zone_content = f"""$TTL 86400
@@ -109,7 +112,12 @@ zone "{domain}" {{
             headers=headers,
             json=data
         )
-        return response.status_code == 201
+        if response.status_code == 201:
+            logger.info(f"SSL certificate created for {domain}")
+            return True
+        else:
+            logger.error(f"Failed to create SSL certificate for {domain}: {response.status_code} - {response.text}")
+            return False
 
     def check_new_domains(self):
         try:
@@ -125,25 +133,29 @@ zone "{domain}" {{
                 records = {'main_ip': ip}
                 self.create_zone_file(domain, records)
                 self.update_bind_config(domain)
-                self.create_ssl_cert(domain)
+                ssl_ok = self.create_ssl_cert(domain)
                 
-                cur.execute("""
-                    UPDATE domains 
-                    SET is_processed = TRUE 
-                    WHERE domain = %s
-                """, (domain,))
-                
+                if ssl_ok:
+                    cur.execute("""
+                        UPDATE domains 
+                        SET is_processed = TRUE 
+                        WHERE domain = %s
+                    """, (domain,))
+                else:
+                    cur.execute("""
+                        UPDATE domains 
+                        SET last_error = %s 
+                        WHERE domain = %s
+                    """, ("SSL creation failed", domain))
+                    
             self.db_conn.commit()
         except Exception as e:
             logger.error(f"Error processing domains: {str(e)}")
+            self.db_conn.rollback()
             raise
         finally:
             if 'cur' in locals():
                 cur.close()
-
-    def verify_dns_records(self, domain):
-        resolver.nameservers = ['10.142.0.2']  # Ensure internal DNS server IP
-        resolver.port = 53                     # Correct DNS port
 
 def main():
     dns_manager = DNSManager()
