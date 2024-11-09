@@ -1,20 +1,29 @@
-version: '3.8'
-
 services:
   bind9:
-    container_name: dns-server
     build: 
       context: ./bind
       dockerfile: Dockerfile
     ports:
-      - "5300:53/tcp"  # Use alternative port
-      - "5300:53/udp"  # Use alternative port
+      - "1053:53/tcp"
+      - "1053:53/udp"
     volumes:
-      - ./bind/config:/etc/bind
-      - ./bind/zones:/var/lib/bind
-      - ./bind/cache:/var/cache/bind
+      - ./bind/config:/etc/bind:rw
+      - ./bind/zones:/var/lib/bind:rw
+      - ./bind/cache:/var/cache/bind:rw
+      - ./bind/run:/var/run/named:rw
+    environment:
+      - TZ=UTC
     restart: always
-
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    restart: always
   postgres:
     image: postgres:13
     environment:
@@ -25,7 +34,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
   dns_manager:
     build:
       context: ./dns_manager
@@ -35,8 +43,7 @@ services:
       - bind9
       - nginx-proxy-manager
     volumes:
-      - ./bind/zones:/var/lib/bind
-      - ./bind/config:/etc/bind
+      - ./bind/zones:/zones
     environment:
       - DB_HOST=postgres
       - DB_USER=dnsadmin
@@ -45,10 +52,5 @@ services:
       - NPM_API_URL=http://nginx-proxy-manager:81
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
-      - ENV=production
-
-volumes:
-  postgres_data:
-
 volumes:
   postgres_data:
