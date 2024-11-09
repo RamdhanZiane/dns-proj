@@ -33,14 +33,22 @@ services:
       - ./init-db:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dnsadmin -d dns_manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   dns_manager:
     build:
       context: ./dns_manager
       dockerfile: Dockerfile
     depends_on:
-      - postgres
-      - bind9
-      - nginx-proxy-manager
+      postgres:
+        condition: service_healthy
+      bind9:
+        condition: service_started
+      nginx-proxy-manager:
+        condition: service_started
     volumes:
       - ./bind/zones:/zones
     environment:
