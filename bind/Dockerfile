@@ -22,8 +22,8 @@ COPY named.conf /etc/bind/
 COPY named.conf.options /etc/bind/
 COPY zones.conf /etc/bind/
 
-# Generate rndc key
-RUN rndc-confgen -a -r /dev/urandom
+# Generate rndc key without the deprecated -r option
+RUN rndc-confgen -a
 
 # Copy initialization script
 COPY init-bind.sh /bind/init-bind.sh

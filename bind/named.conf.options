@@ -13,7 +13,7 @@ options {
     hostname none;
     server-id none;
     
-    // Enable controls for rndc
+    // Enable controls for rndc using the generated rndc.key
     controls {
         inet 127.0.0.1 port 953
             allow { 127.0.0.1; } keys { "rndc-key"; };
