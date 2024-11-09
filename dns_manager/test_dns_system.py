@@ -126,7 +126,7 @@ class DNSSystemTester:
 
     def run_tests(self):
         test_domain = f"test-{int(datetime.now().timestamp())}.example.com"
-        test_ip = "192.168.1.100"
+        test_ip = "127.0.0.1"
 
         try:
             # Test 1: Add domain

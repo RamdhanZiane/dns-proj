@@ -17,7 +17,7 @@ services:
     user: bind
     restart: always
     environment:
-      - BIND9_RANDOMIZE_PORT=yes  # Optional: Randomize DNS port for security
+      - BIND9_RANDOMIZE_PORT=no  # Disable port randomization
       
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
@@ -61,25 +61,13 @@ services:
     volumes:
       - ./bind/zones:/zones
     environment:
-      - DB_HOST=postgres
+      - DB_HOST=postgres  # Updated to service name
       - DB_USER=dnsadmin
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=dns_manager
       - NPM_API_URL=http://nginx-proxy-manager:81
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
-
-  # Added a reload service to handle BIND9 reloads
-  bind9_reloader:
-    image: alpine:latest
-    depends_on:
-      - bind9
-    volumes:
-      - ./bind/config:/etc/bind
-      - ./bind/zones:/var/lib/bind
-    entrypoint: /bin/sh
-    command: -c "apk add --no-cache bind-tools && while true; do inotifywait -e modify /etc/bind/zones.conf /var/lib/bind/*.zone && rndc reload; done"
-    restart: unless-stopped
 
 volumes:
   postgres_data:
