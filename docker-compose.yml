@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   bind9:
     build: 
@@ -12,6 +14,9 @@ services:
       - /records:/var/lib/bind
     user: bind
     restart: always
+    networks:
+      dns_net:
+        ipv4_address: 10.142.0.2
       
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
@@ -23,6 +28,9 @@ services:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
     restart: always
+    networks:
+      dns_net:
+        ipv4_address: 10.142.0.3
 
   postgres:
     image: postgres:13
@@ -40,6 +48,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      dns_net:
+        ipv4_address: 10.142.0.4
 
   dns_manager:
     build:
@@ -62,8 +73,18 @@ services:
       - NPM_API_URL=http://nginx-proxy-manager:81
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
+    networks:
+      dns_net:
+        ipv4_address: 10.142.0.5
 
 volumes:
   postgres_data:
   bind9-cache:
   bind9-run:
+
+networks:
+  dns_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.142.0.0/24
