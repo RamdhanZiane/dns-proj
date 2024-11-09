@@ -11,6 +11,7 @@ services:
     volumes:
       - ./bind/config:/etc/bind
       - ./bind/zones:/var/lib/bind
+      - ./bind/cache:/var/cache/bind
     restart: always
 
   nginx-proxy-manager:
@@ -44,7 +45,8 @@ services:
       - bind9
       - nginx-proxy-manager
     volumes:
-      - ./bind/zones:/zones
+      - ./bind/zones:/var/lib/bind
+      - ./bind/config:/etc/bind
     environment:
       - DB_HOST=postgres
       - DB_USER=dnsadmin
@@ -53,6 +55,7 @@ services:
       - NPM_API_URL=http://nginx-proxy-manager:81
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
+      - ENV=production
 
 volumes:
   postgres_data:

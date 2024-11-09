@@ -24,9 +24,21 @@ class DNSManager:
         self.npm_email = os.environ['NPM_EMAIL']
         self.npm_password = os.environ['NPM_PASSWORD']
         self.npm_token = None
-        self.zones_path = '/zones'  # Make path configurable for testing
-        self.bind_config_path = '/etc/bind/zones.conf'  # This will be overridden in test
-        logger.info("DNS Manager initialized")
+        
+        # Set paths based on environment
+        self.is_production = os.getenv('ENV', 'development') == 'production'
+        if self.is_production:
+            self.zones_path = '/var/lib/bind'
+            self.bind_config_path = '/etc/bind/zones.conf'
+        else:
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            self.zones_path = os.path.join(project_root, 'bind', 'zones')
+            self.bind_config_path = os.path.join(project_root, 'bind', 'config', 'zones.conf')
+            
+        os.makedirs(os.path.dirname(self.bind_config_path), exist_ok=True)
+        os.makedirs(self.zones_path, exist_ok=True)
+        
+        logger.info(f"DNS Manager initialized in {'production' if self.is_production else 'development'} mode")
 
     def login_to_npm(self):
         response = requests.post(f"{self.npm_url}/api/tokens", json={
