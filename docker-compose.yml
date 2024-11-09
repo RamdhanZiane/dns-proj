@@ -9,10 +9,8 @@ services:
     volumes:
       - ./bind/config:/etc/bind:rw
       - ./bind/zones:/var/lib/bind:rw
-      - ./bind/cache:/var/cache/bind:rw
-      - ./bind/run:/var/run/named:rw
-    environment:
-      - TZ=UTC
+      - bind9-cache:/var/cache/bind:rw
+    user: bind
     restart: always
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
@@ -54,3 +52,4 @@ services:
       - NPM_PASSWORD=${NPM_PASSWORD}
 volumes:
   postgres_data:
+  bind9-cache:
