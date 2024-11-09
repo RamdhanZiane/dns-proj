@@ -12,7 +12,7 @@ services:
       - ./bind/config:/etc/bind
       - ./cache:/var/cache/bind
       - /records:/var/lib/bind
-    user: bind
+    # Removed: user: bind
     restart: always
     networks:
       dns_net:

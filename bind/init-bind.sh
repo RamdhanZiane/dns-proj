@@ -1,45 +1,32 @@
 #!/bin/bash
-# Create required files if they don't exist
+
+# Ensure bind user owns all required directories
+chown -R bind:bind /etc/bind /var/cache/bind /var/lib/bind /var/run/named
+chmod -R 755 /etc/bind /var/cache/bind /var/lib/bind /var/run/named
+
+# Create and set permissions for config files
 touch /etc/bind/zones.conf
 touch /etc/bind/rndc.key
+chown bind:bind /etc/bind/zones.conf /etc/bind/rndc.key
+chmod 644 /etc/bind/zones.conf /etc/bind/rndc.key
 
-# Ensure the session key directory exists
-mkdir -p /var/run/named
-chown bind:bind /var/run/named
-chmod 755 /var/run/named
-
-# Set ownership and permissions for Bind directories
-chown -R bind:bind /etc/bind
-chown -R bind:bind /var/cache/bind
-chown -R bind:bind /var/lib/bind
-
-chmod -R 755 /etc/bind
-chmod -R 755 /var/cache/bind
-chmod -R 755 /var/lib/bind
-
-# Bind9 listens on internal IP only
-cat <<EOF > /etc/bind/named.conf.options
+# Configure bind
+cat > /etc/bind/named.conf <<EOF
 options {
     directory "/var/cache/bind";
-
-    // Listen on the internal Docker network IP
     listen-on { 10.142.0.2; };
     listen-on-v6 { none; };
-
     allow-query { any; };
     recursion no;
-
     dnssec-validation auto;
-
-    auth-nxdomain no;    # conform to RFC1035
-    listen-on { any; };
+    auth-nxdomain no;
 };
-EOF
 
-# Include zones configuration
-cat <<EOF >> /etc/bind/named.conf
 include "/etc/bind/zones.conf";
 EOF
 
-# Start named in foreground
-exec /usr/sbin/named -g -c /etc/bind/named.conf -u bind
+chown bind:bind /etc/bind/named.conf
+chmod 644 /etc/bind/named.conf
+
+# Start named as bind user
+exec su -s /bin/bash bind -c '/usr/sbin/named -g -c /etc/bind/named.conf'
