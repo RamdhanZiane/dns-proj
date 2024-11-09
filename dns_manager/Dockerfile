@@ -11,4 +11,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN chmod +x wait-for-postgres.sh
 
-CMD ["./wait-for-postgres.sh", "python", "manager.py"]
+RUN ./wait-for-postgres.sh
+CMD ["python", "manager.py"]
