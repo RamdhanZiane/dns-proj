@@ -1,6 +1,7 @@
 #!/bin/bash
 # Create required files if they don't exist
 touch /etc/bind/zones.conf
+touch /etc/bind/rndc.key
 
 # Ensure the session key directory exists
 mkdir -p /var/run/named

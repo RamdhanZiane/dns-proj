@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 # Install BIND9 and necessary utilities
-RUN apt-get update && apt-get install -y bind9 bind9utils bind9-doc dnsutils && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y bind9 bind9utils bind9-doc dnsutils inotify-tools && rm -rf /var/lib/apt/lists/*
 
 # Create necessary directories with correct permissions
 RUN mkdir -p /var/run/named \

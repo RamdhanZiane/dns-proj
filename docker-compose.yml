@@ -69,6 +69,18 @@ services:
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
 
+  # Added a reload service to handle BIND9 reloads
+  bind9_reloader:
+    image: alpine:latest
+    depends_on:
+      - bind9
+    volumes:
+      - ./bind/config:/etc/bind
+      - ./bind/zones:/var/lib/bind
+    entrypoint: /bin/sh
+    command: -c "apk add --no-cache bind-tools && while true; do inotifywait -e modify /etc/bind/zones.conf /var/lib/bind/*.zone && rndc reload; done"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   bind9-cache:
