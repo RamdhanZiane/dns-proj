@@ -10,11 +10,13 @@ services:
       - ./bind/config:/etc/bind:rw
       - ./bind/zones:/var/lib/bind:rw
       - bind9-cache:/var/cache/bind:rw
-      - bind9-run:/run/named:rw       # Corrected path
+      - bind9-run:/var/run/named:rw
     cap_add:
       - NET_ADMIN
     user: bind
     restart: always
+    entrypoint: ["/bind/init-bind.sh"]
+  
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
     ports:
@@ -25,6 +27,7 @@ services:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
     restart: always
+
   postgres:
     image: postgres:13
     environment:
@@ -41,6 +44,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
   dns_manager:
     build:
       context: ./dns_manager
@@ -62,6 +66,7 @@ services:
       - NPM_API_URL=http://nginx-proxy-manager:81
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
+
 volumes:
   postgres_data:
   bind9-cache:
