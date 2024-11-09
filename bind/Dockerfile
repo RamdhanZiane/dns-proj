@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-# Install BIND9
+# Install BIND9 and necessary utilities
 RUN apt-get update && apt-get install -y bind9 bind9utils bind9-doc dnsutils && rm -rf /var/lib/apt/lists/*
 
 # Create necessary directories with correct permissions
@@ -22,12 +22,17 @@ COPY named.conf /etc/bind/
 COPY named.conf.options /etc/bind/
 COPY zones.conf /etc/bind/
 
-# Set permissions for config files
-RUN chown -R bind:bind /etc/bind && chmod 644 /etc/bind/*.conf
+# Copy initialization script
+COPY init-bind.sh /bind/init-bind.sh
+
+# Set permissions for config and init script
+RUN chown -R bind:bind /etc/bind && chmod 644 /etc/bind/*.conf \
+    && chown bind:bind /bind/init-bind.sh \
+    && chmod +x /bind/init-bind.sh
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
 
 USER bind
 
-CMD ["/usr/sbin/named", "-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
+ENTRYPOINT ["/bind/init-bind.sh"]

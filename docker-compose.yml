@@ -15,7 +15,8 @@ services:
       - NET_ADMIN
     user: bind
     restart: always
-    entrypoint: ["/bind/init-bind.sh"]
+    # Removed entrypoint to use Dockerfile's ENTRYPOINT
+    # entrypoint: ["/bind/init-bind.sh"]
   
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
