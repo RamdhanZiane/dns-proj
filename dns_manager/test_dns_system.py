@@ -6,20 +6,55 @@ import dns.resolver
 from datetime import datetime
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
+
+# Default configuration - matches docker-compose.yml
+DEFAULT_CONFIG = {
+    'DB_HOST': 'localhost',
+    'DB_NAME': 'dns_manager',
+    'DB_USER': 'dnsadmin',
+    'DB_PASSWORD': 'your_secure_password',  # Should match value in .env
+    'NPM_API_URL': 'http://localhost:81',
+    'NPM_EMAIL': 'admin@example.com',
+    'NPM_PASSWORD': 'your_npm_password'
+}
 
 class DNSSystemTester:
     def __init__(self):
-        self.db_conn = psycopg2.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            database=os.getenv('DB_NAME', 'dns_manager'),
-            user=os.getenv('DB_USER', 'dnsadmin'),
-            password=os.getenv('DB_PASSWORD'),
-            port=5432
-        )
-        self.npm_url = os.getenv('NPM_API_URL', 'http://localhost:81')
-        self.npm_email = os.getenv('NPM_EMAIL')
-        self.npm_password = os.getenv('NPM_PASSWORD')
+        # Use environment variables with fallback to defaults
+        self.config = {
+            key: os.getenv(key, DEFAULT_CONFIG[key])
+            for key in DEFAULT_CONFIG
+        }
+        
+        print("\n🔧 Testing with configuration:")
+        print(f"DB_HOST: {self.config['DB_HOST']}")
+        print(f"DB_NAME: {self.config['DB_NAME']}")
+        print(f"DB_USER: {self.config['DB_USER']}")
+        
+        try:
+            self.db_conn = psycopg2.connect(
+                host=self.config['DB_HOST'],
+                database=self.config['DB_NAME'],
+                user=self.config['DB_USER'],
+                password=self.config['DB_PASSWORD'],
+                port=5432
+            )
+            print("✅ Database connection successful")
+        except psycopg2.Error as e:
+            print(f"❌ Database connection failed: {str(e)}")
+            print("\n🔍 Troubleshooting tips:")
+            print("1. Check if PostgreSQL is running:")
+            print("   docker ps | grep postgres")
+            print("2. Verify credentials in .env file")
+            print("3. Ensure database is initialized:")
+            print("   docker-compose exec postgres psql -U dnsadmin -d dns_manager")
+            raise
+
+        self.npm_url = self.config['NPM_API_URL']
+        self.npm_email = self.config['NPM_EMAIL']
+        self.npm_password = self.config['NPM_PASSWORD']
         self.npm_token = None
 
     def add_test_domain(self, domain, ip_address):
