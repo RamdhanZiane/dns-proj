@@ -2,27 +2,17 @@ version: '3.8'
 
 services:
   bind9:
+    container_name: dns-server
     build: 
       context: ./bind
       dockerfile: Dockerfile
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "5300:53/tcp"  # Use alternative port
+      - "5300:53/udp"  # Use alternative port
     volumes:
       - ./bind/config:/etc/bind
       - ./bind/zones:/var/lib/bind
       - ./bind/cache:/var/cache/bind
-    restart: always
-
-  nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:latest'
-    ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
     restart: always
 
   postgres:
@@ -56,6 +46,9 @@ services:
       - NPM_EMAIL=${NPM_EMAIL}
       - NPM_PASSWORD=${NPM_PASSWORD}
       - ENV=production
+
+volumes:
+  postgres_data:
 
 volumes:
   postgres_data:
